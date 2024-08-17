@@ -1,0 +1,4 @@
+claude-engineer-env/
+code_execution_env/
+.env
+.DS_STORE

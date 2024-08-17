@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+  ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        repository: 'jfrogdev/project-examples'
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Set up Gradle
+      uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: 2.4
+
+    - name: Configure Artifactory
+      run: |
+        echo "artifactory_user=$ARTIFACTORY_USER" >> gradle.properties
+        echo "artifactory_password=$ARTIFACTORY_PASSWORD" >> gradle.properties
+        echo "artifactory_contextUrl=$ARTIFACTORY_URL" >> gradle.properties
+
+    - name: Build with Gradle
+      run: |
+        cd gradle-examples/4/gradle-example-ci-server/
+        gradle clean artifactoryPublish
+
+    - name: Publish Build Info
+      run: |
+        curl -u $ARTIFACTORY_USER:$ARTIFACTORY_PASSWORD -X PUT "$ARTIFACTORY_URL/api/build" -H "Content-Type: application/json" -d @build-info.json
+      shell: bash

@@ -1,0 +1,96 @@
+openapi: 3.1.0
+info:
+  title: Weather Service API
+  version: 1.0.0
+  description: API for retrieving weather information converted from SOAP to REST
+
+servers:
+  - url: https://api.personal.weather.com/globalweather
+    description: Weather Service endpoint
+
+paths:
+  /GetCitiesByCountry:
+    get:
+      summary: Get cities by country
+      description: Retrieve a list of cities for a given country
+      parameters:
+        - name: CountryName
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitiesResponse'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /GetWeather:
+    get:
+      summary: Get weather for a city
+      description: Retrieve weather information for a specific city
+      parameters:
+        - name: CityName
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: CountryName
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    CitiesResponse:
+      type: object
+      properties:
+        cities:
+          type: array
+          items:
+            type: string
+          description: List of city names
+
+    WeatherResponse:
+      type: object
+      properties:
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+            country:
+              type: string
+        temperature:
+          type: string
+        relativeHumidity:
+          type: string
+        wind:
+          type: string
+        pressure:
+          type: string
+        visibility:
+          type: string
+        skyConditions:
+          type: string
+        lastUpdate:
+          type: string
+          format: date-time
